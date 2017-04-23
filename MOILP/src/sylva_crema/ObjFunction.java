@@ -41,11 +41,51 @@ public class ObjFunction {
 		}		
 	}
 	
+	public ObjFunction (ArrayList<String> v, ArrayList<Integer> c) {
+		vars = v;
+		coefs = c;
+	}
+	
+	public int calculateObjValue (double[] values, ArrayList<Variable> v) {
+		int result = 0;
+		ArrayList<String> varNames = new ArrayList<String> ();
+		for (int i = 0; i < v.size (); i++) {
+			varNames.add (v.get (i).getName ());
+		}
+		for (int i = 0; i < vars.size (); i++) {
+			int index = varNames.indexOf (vars.get (i));
+			result += coefs.get (index) * values[index];
+		}
+		return result;
+	}
+	
+	public ArrayList<String> getVars () {
+		return vars;
+	}
+	
+	public ArrayList<Integer> getCoefs () {
+		return coefs;
+	}
+	
 	public String toString () {
 		String string = "";
 		for (int i = 0; i < vars.size (); i++) {
-			string += coefs.get (i) + " " + vars.get (i) + " ";
+			if (coefs.get (i) < 0) {
+				string += "- " + (- coefs.get (i));
+			} else {
+				string += "+ " + coefs.get (i);
+			}
+			string += " " + vars.get (i) + " ";
 		}
 		return string;
+	}
+	
+	public ObjFunction changeSymbol () {
+		ArrayList<Integer> changedCoefs = new ArrayList<Integer> ();
+		for (int i = 0; i < coefs.size (); i++) {
+			changedCoefs.add (- coefs.get (i));
+		}
+		
+		return new ObjFunction (vars, changedCoefs);
 	}
 }

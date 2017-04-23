@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class MOILP {
 	private ArrayList<ObjFunction> functions;
 	private ArrayList<Constraint> constraints;
-	private ArrayList<String> variables;
+	private ArrayList<Variable> variables;
 	
 	/*
 	 * El constructor recibe el nombre del fichero que contiene el MOILP, para poder leerlo y 
@@ -18,7 +18,7 @@ public class MOILP {
 	public MOILP (String file) throws IOException {
 		functions = new ArrayList<ObjFunction> ();
 		constraints = new ArrayList<Constraint> ();
-		variables = new ArrayList<String> ();
+		variables = new ArrayList<Variable> ();
 		
 		FileReader f = new FileReader (file);
 		BufferedReader b = new BufferedReader (f);
@@ -52,15 +52,53 @@ public class MOILP {
 		String[] tokens = aux.split ("\\s");
 		for (int i = 0; i < tokens.length; i++) {
 			if (tokens[i].length () != 0) {
-				variables.add(tokens[i]);
+				variables.add(new Variable (tokens[i]));
+			}
+		}
+		b.readLine ();		// eliminamos la línea "Bounds"
+		while (b.ready ()) {
+			aux = b.readLine ();
+			String[] tokens2 = aux.split ("\\s");
+			for (int i = 0; i < tokens2.length; i++) {
+				if (tokens2[i].length () != 0) {
+					String nameVar = tokens2[i];
+					i++;
+					if (tokens2[i].equals ("<=")) {
+						getVar (nameVar).setUBound (new Integer (tokens2[i + 1]));
+					} else {
+						getVar (nameVar).setLBound (new Integer (tokens2[i + 1]));
+					}
+					i++;
+				}
 			}
 		}
 		
 		b.close ();
 	}
 	
-	public ArrayList<String> getVars () {
+	public int[] calculateObjValues (double[] varValues) {
+		int[] objValues = new int[functions.size ()];
+		for (int i = 0; i < functions.size (); i++) {
+			objValues[i] = functions.get (i).calculateObjValue(varValues, variables);
+		}
+		return objValues;
+	}
+	
+	public Variable getVar (String name) {
+		for (int i = 0; i < variables.size (); i++) {
+			if (variables.get (i).getName ().equals (name)) {
+				return variables.get (i);
+			}
+		}
+		return null;
+	}
+	
+	public ArrayList<Variable> getVars () {
 		return variables;
+	}
+	
+	public ArrayList<ObjFunction> getFunctions () {
+		return functions;
 	}
 	
 	public ArrayList<Constraint> getConstraints () {

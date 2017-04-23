@@ -44,6 +44,22 @@ public class Constraint {
 		}		
 	}
 	
+	public ArrayList<String> getVars () {
+		return vars;
+	}
+	
+	public ArrayList<Integer> getCoefs () {
+		return coefs;
+	}
+	
+	public String getType () {
+		return type;
+	}
+	
+	public int getValue () {
+		return value;
+	}
+	
 	public String toString () {
 		String aux = "";
 		for (int i = 0; i < vars.size (); i++) {
