@@ -22,6 +22,7 @@ public class Gurobi extends Solver {
 	public Gurobi () {
 		try {
 			env = new GRBEnv ();
+			env.set (GRB.IntParam.OutputFlag, 0);
 			model = new GRBModel (env);
 			vars = new ArrayList<GRBVar> ();
 			varsName = new ArrayList<String> ();
@@ -41,11 +42,16 @@ public class Gurobi extends Solver {
 	public Boolean solve() {
 		try {
 			model.optimize ();
+			if (model.get(GRB.IntAttr.SolCount) != 0) {
+				return true;
+			} else {
+				return false;
+			}
 			
 		} catch (GRBException e) {
 			e.printStackTrace();
+			return false;
 		}
-		return false;
 	}
 
 	public Double getObjVal() {
@@ -72,9 +78,11 @@ public class Gurobi extends Solver {
 	public void addVars (ArrayList<Variable> v) {
 		for (int i = 0; i < v.size (); i++) {
 			try {
-				System.out.println("peta?");
-				model.addVar (v.get (i).getLBound (), v.get (i).getUBound (), 0.0, GRB.INTEGER, v.get (i).getName ());
-				vars.add (model.getVar (i));
+				if (v.get (i).isInteg ()) {
+					vars.add (model.addVar (v.get (i).getLBound (), v.get (i).getUBound (), 0.0, GRB.INTEGER, v.get (i).getName ()));
+				} else {
+					vars.add (model.addVar (v.get (i).getLBound (), v.get (i).getUBound (), 0.0, GRB.CONTINUOUS, v.get (i).getName ()));
+				}
 				varsName.add (v.get (i).getName ());
 			} catch (GRBException e) {
 				e.printStackTrace();

@@ -4,11 +4,13 @@ public class Variable {
 	private String name;
 	private int lBound;
 	private int uBound;
+	private Boolean integ;
 	
 	public Variable (String n, int l, int u) {
 		name = n;
 		lBound = l;
 		uBound = u;
+		integ = false;
 	}
 	
 	/**
@@ -45,6 +47,14 @@ public class Variable {
 	}
 	
 	public String toString () {
-		return "" + name;
+		return "" + name + " -> {" + lBound + ", " + uBound + "} -> " + integ;
+	}
+	
+	public void setInteg (Boolean i) {
+		integ = i;
+	}
+	
+	public Boolean isInteg () {
+		return integ;
 	}
 }

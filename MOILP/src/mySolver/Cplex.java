@@ -77,7 +77,11 @@ public class Cplex extends Solver {
 	public void addVars (ArrayList<Variable> v) {
 		for (int i = 0; i < v.size (); i++) {
 			try {
-				vars.add (cplex.intVar(v.get (i).getLBound (), v.get (i).getUBound ()));
+				if (v.get (i).isInteg ()) {
+					vars.add (cplex.intVar(v.get (i).getLBound (), v.get (i).getUBound ()));
+				} else {
+					vars.add (cplex.numVar(v.get (i).getLBound (), v.get (i).getUBound ()));
+				}
 				varsName.add (v.get (i).getName ());
 			} catch (IloException e) {
 				e.printStackTrace();

@@ -11,45 +11,53 @@ import java.util.ArrayList;
 
 public class SylvaCrema {
 	private MOILP moilp;
-	//private int[] weight;		// vector de pesos
+	private int[] weight = {4, 3};					// vector de pesos
 	private ArrayList<Solution> solutions;		// vector de soluciones (valores de las variables y valores de que toman las funciones objetivo)
-	private ArrayList<Integer> M;				// cotas inferiores de cada una de las funciones objetivo
-	private final String SOLVER = "gurobi";
+	private LP p0;
 	
 	public SylvaCrema (MOILP m) {
 		solutions = new ArrayList<Solution> ();
-		M = new ArrayList<Integer> ();
 		moilp = m;
-		for (int i = 0; i < m.getFunctions ().size (); i++) {
-			M.add (calculateM (m.getFunctions ().get (i)));
+		for (int i = 0; i < moilp.getFunctions ().size (); i++) {
+			if (!moilp.getFunctions ().get (i).isMax ()) {
+				moilp.getFunctions ().set (i, moilp.getFunctions ().get (i).changeSymbol ());
+			}
 		}
-	}
-	
-	public int calculateM (ObjFunction f) {
-		LP lp = new LP ();
-		lp.setFunction (f.changeSymbol ());
-		for (int i = 0; i < moilp.getVars ().size (); i++) {
-			lp.addVariable (moilp.getVars ().get (i));
-		}
-		double[] aux = lp.solveLP (SOLVER);
-		
-		return - f.calculateObjValue (aux, moilp.getVars ());
+		moilp.calculateM ();
 	}
 	
 	public void solve () {
 		solveP0 ();
+		
+		int iter = 1;
+		Boolean solved = true;
+		while (solved) {
+			System.out.println ("ITERACION " + iter);
+			solved = solveP (iter, p0);
+			iter++;
+		}
 	}
 	
 	public void solveP0 () {
-		LP p0 = new LP ();
+		p0 = new LP ();
 		String function = "";
 		ArrayList<Variable> vars = moilp.getVars ();
-		for (int i = 0; i < vars.size () - 1; i++) {
-			function += vars.get (i).getName () + " + ";
+		for (int i = 0; i < vars.size (); i++) {
+			int ac = 0;
+			for (int j = 0; j < moilp.getFunctions ().size (); j++) {
+				int index = moilp.getFunctions ().get (j).getVars ().indexOf (vars.get (i).getName ());
+				if (index != -1) {
+					ac += weight[j] * moilp.getFunctions ().get (j).getCoefs ().get (index);
+				}
+			}
+			if (ac < 0) {
+				function += "- " + (- ac) + " " + vars.get (i).getName () + " ";
+			} else {
+				function += "+ " + ac + " " + vars.get (i).getName () + " ";
+			}
 		}
-		function += vars.get (vars.size () - 1).getName ();
-		
-		p0.setFunction (new ObjFunction (function));
+
+		p0.setFunction (new ObjFunction (function, "Maximize"));
 		ArrayList<Constraint> cons = moilp.getConstraints ();
 		for (int i = 0; i < cons.size (); i++) {
 			p0.addConstraint (cons.get (i));
@@ -61,29 +69,24 @@ public class SylvaCrema {
 		
 		System.out.println (p0);
 		
-		double[] varValues = p0.solveLP(SOLVER);
+		double[] varValues = p0.solveLP(moilp.getSolver ());
 		int[] objValues = moilp.calculateObjValues (varValues);
 		solutions.add (new Solution (varValues, objValues));
 		System.out.println ("P0 " + solutions.get (0));
-		int iter = 1;
-		Boolean solved = true;
-		while (solved) {
-			System.out.println ("ITERACION " + iter);
-			solved = solveP (iter, p0);
-			iter++;
-		}
 	}
 	
 	public Boolean solveP (int iter, LP lp) {
 		String consV = "";
 		for (int i = 0; i < moilp.getFunctions ().size (); i++) {
 			String varName = "y" + iter + "-" + (i + 1);
-			lp.addVariable(new Variable (varName, 0, 1));
+			Variable varAux = new Variable (varName, 0, 1);
+			varAux.setInteg (true);
+			lp.addVariable(varAux);
 			consV += varName + " + ";
 			String consAux = moilp.getFunctions ().get (i).toString ();
 			
 			int val1 = solutions.get (iter - 1).getObjFunVal (i) + 1;
-			int val2 = M.get (i);
+			int val2 = moilp.getM ().get (i);
 			int val = val1 + val2;
 			if (val > 0) {
 				consAux += " - " + val;
@@ -92,17 +95,17 @@ public class SylvaCrema {
 			}
 			consAux += " " + varName + " >= ";
 						
-			if (M.get (i) < 0) {
-				consAux += (- M.get (i));
+			if (moilp.getM ().get (i) < 0) {
+				consAux += (- moilp.getM ().get (i));
 			} else {
-				consAux +="-" + M.get (i);
+				consAux +="-" + moilp.getM ().get (i);
 			}
 			lp.addConstraint (new Constraint (consAux));
 		}
 		lp.addConstraint (new Constraint (consV.substring (0, consV.length () - 3) + " >= 1"));
 		System.out.println (lp);
 		
-		double[] varValues = lp.solveLP(SOLVER);
+		double[] varValues = lp.solveLP(moilp.getSolver ());
 		if (varValues != null) {
 			int[] objValues = moilp.calculateObjValues (varValues);
 			solutions.add (new Solution (varValues, objValues));

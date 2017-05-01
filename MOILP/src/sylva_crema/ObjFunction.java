@@ -5,12 +5,14 @@ import java.util.ArrayList;
 public class ObjFunction {
 	private ArrayList<String> vars;			// Variables que intervienen en la función objetivo, nombre de las variables
 	private ArrayList<Integer> coefs;		// Coeficientes de las variables guardadas en "vars" para esta función objetivo
+	private Boolean max;					// indica si la función es de maximizar o minimizar
 	
 	/*
 	 * El constructor recibe la función objetivo como una cadena de caracteres y la descompone para 
 	 * guardar las variables y sus coeficientes
 	 */
-	public ObjFunction (String function) {
+	public ObjFunction (String function, String type) {
+		max = type.equals("Maximize");
 		vars = new ArrayList<String> ();
 		coefs = new ArrayList<Integer> ();
 		
@@ -87,5 +89,9 @@ public class ObjFunction {
 		}
 		
 		return new ObjFunction (vars, changedCoefs);
+	}
+	
+	public Boolean isMax () {
+		return max;
 	}
 }
