@@ -8,6 +8,5 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/Natalie/Applications/IBM/ILOG/CPLEX_Studio_Community127/cplex/bin/x86-64_osx"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/Users/Natalie/Downloads/clp-java-1.16.10-full.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

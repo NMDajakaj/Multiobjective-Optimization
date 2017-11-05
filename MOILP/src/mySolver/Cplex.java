@@ -7,9 +7,9 @@ import ilog.concert.IloLinearNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 import ilog.cplex.IloCplex.UnknownObjectException;
-import sylva_crema.Constraint;
-import sylva_crema.ObjFunction;
-import sylva_crema.Variable;
+import common.Constraint;
+import common.ObjFunction;
+import common.Variable;
 
 public class Cplex extends Solver {
 	private ArrayList<IloNumVar> vars;

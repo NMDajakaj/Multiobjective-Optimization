@@ -1,0 +1,17 @@
+Maximize
+	- 1 x1 + 3 x2 + 4 x3 + 3 x4 - 2 x5 
+Maximize
+	+ 6 x1 + 1 x2 - 2 x3 + 1 x4 
+Maximize
+	+ 5 x1 + 3 x4 
+Subject To
+	- 3 x1 - 2 x2 + 4 x3 - 4 x5 <= 10
+Bounds
+	0 <= x1 <= 4
+	0 <= x2 <= 4
+	0 <= x3 <= 4
+	0 <= x4 <= 4
+	0 <= x5 <= 4
+Integers
+	x1 x2 x3 x4 x5 
+End

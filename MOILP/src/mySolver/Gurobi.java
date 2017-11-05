@@ -8,9 +8,9 @@ import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBModel;
 import gurobi.GRBVar;
-import sylva_crema.Constraint;
-import sylva_crema.ObjFunction;
-import sylva_crema.Variable;
+import common.Constraint;
+import common.ObjFunction;
+import common.Variable;
 
 public class Gurobi extends Solver {
 

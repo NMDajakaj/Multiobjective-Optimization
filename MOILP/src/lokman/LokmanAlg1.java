@@ -1,27 +1,19 @@
-package sylva_crema;
+package lokman;
 
 import java.util.ArrayList;
-
 import common.*;
 
-/* 
- * Algoritmo para generar la región eficiente de un problema de optimización multiobjetivo lineal entero (MOILP)
- * Algoritmo para generar los puntos de un MOILP de Sylva y Crema
- * Tendrá los métodos necesarios para implementar el algoritmo y almacenará el MOILP y los resultados
- * Natalie Dajakaj, Trabajo Final de Grado (TFG), Cuarto del Grado de Ingeniería Informática, curso 2016-2017
- * */
-
-public class SylvaCrema {
+public class LokmanAlg1 {
 	private MOILP moilp;
-	private int[] weight = {4, 3, 3, 3, 2};					// vector de pesos
-	private ArrayList<Solution> solutions;		// vector de soluciones (valores de las variables y valores de que toman las funciones objetivo)
+	private final double EPSILON = 0.01;
+	private ArrayList<Solution> solutions;
 	private LP p0;
 	private long timeIni;
 	private long timeEnd;
 	
-	public SylvaCrema (MOILP m) {
-		solutions = new ArrayList<Solution> ();
+	public LokmanAlg1 (MOILP m) {
 		moilp = m;
+		solutions = new ArrayList<Solution> ();
 		for (int i = 0; i < moilp.getFunctions ().size (); i++) {
 			if (!moilp.getFunctions ().get (i).isMax ()) {
 				moilp.getFunctions ().set (i, moilp.getFunctions ().get (i).changeSymbol ());
@@ -30,8 +22,8 @@ public class SylvaCrema {
 		moilp.calculateM (true);
 	}
 	
-	public void solve () {		
-		timeIni = System.currentTimeMillis ();
+	public void solve () {	
+		timeIni = System.currentTimeMillis();
 		int iter = 1;
 		Boolean solved = solveP0 ();
 		while (solved) {
@@ -40,11 +32,10 @@ public class SylvaCrema {
 			iter++;
 		}
 		
-		/*for (int i = 0; i < solutions.size (); i++) {
-			System.out.println (solutions.get (i));
-		}*/
-		
 		timeEnd = System.currentTimeMillis();
+		//for (int i = 0; i < solutions.size (); i++) {
+			//System.out.println (solutions.get (i));
+		//}
 		
 		System.out.println(solutions.size() + " soluciones | " + (timeEnd - timeIni) + " ms");
 	}
@@ -54,11 +45,15 @@ public class SylvaCrema {
 		String function = "";
 		ArrayList<Variable> vars = moilp.getVars ();
 		for (int i = 0; i < vars.size (); i++) {
-			int ac = 0;
-			for (int j = 0; j < moilp.getFunctions ().size (); j++) {
+			double ac = 0;
+			int index2 = moilp.getFunctions ().get (moilp.getFunctions ().size () - 1).getVars ().indexOf (moilp.getVars ().get (i).getName ());
+			if (index2 != -1) {
+				ac = moilp.getFunctions ().get (moilp.getFunctions ().size () - 1).getCoefs ().get (index2);
+			}
+			for (int j = 0; j < moilp.getFunctions ().size () - 1; j++) {
 				int index = moilp.getFunctions ().get (j).getVars ().indexOf (vars.get (i).getName ());
 				if (index != -1) {
-					ac += weight[j] * moilp.getFunctions ().get (j).getCoefs ().get (index);
+					ac += EPSILON * moilp.getFunctions ().get (j).getCoefs ().get (index);
 				}
 			}
 			if (ac < 0) {
@@ -94,7 +89,7 @@ public class SylvaCrema {
 	
 	public Boolean solveP (int iter, LP lp) {
 		String consV = "";
-		for (int i = 0; i < moilp.getFunctions ().size (); i++) {
+		for (int i = 0; i < moilp.getFunctions ().size () - 1; i++) {
 			String varName = "y" + iter + "-" + (i + 1);
 			Variable varAux = new Variable (varName, 0, 1);
 			varAux.setInteg (true);
@@ -133,4 +128,5 @@ public class SylvaCrema {
 			return false;
 		}
 	}
+
 }
